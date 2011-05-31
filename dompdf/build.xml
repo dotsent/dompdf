@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+
+<project name="DomPDF" default="build" basedir=".">
+    <taskdef classname="phing.tasks.ext.d51PearPkg2Task" name="d51pearpkg2" />
+
+    <property file="build.properties" />
+
+    <!--
+        Fileset for the sources of the Doctrine ORM.
+    -->
+    <fileset id="dompdf-sources" dir=".">
+        <include name="include/**"/>
+        <include name="lib/**"/>
+    </fileset>
+    <!--
+        Clean the directory for the next build.
+    -->
+    <target name="clean">
+        <available file="./build.properties" property="build_properties_exist" value="true"/>
+        <fail unless="build_properties_exist" message="The build.properties file is missing." />
+
+        <delete dir="${build.dir}" includeemptydirs="true" />
+        <delete dir="${dist.dir}" includeemptydirs="true" />
+        <delete dir="${report.dir}" includeemptydirs="true" />
+    </target>
+
+    <!--
+        Prepare the new build directories after cleaning
+    -->
+    <target name="prepare" depends="clean">
+        <echo msg="Creating build directory: ${build.dir}" />
+        <mkdir dir="${build.dir}" />
+        <echo msg="Creating distribution directory: ${dist.dir}" />
+        <mkdir dir="${dist.dir}" />
+        <echo msg="Creating report directory: ${report.dir}" />
+        <mkdir dir="${report.dir}" />
+        <mkdir dir="${build.dir}/logs"/>
+        <mkdir dir="${report.dir}/tests"/>
+    </target>
+
+   <target name="build-dompdf" depends="prepare">
+        <copy todir="${build.dir}/dompdf/DomPDF">
+            <fileset refid="dompdf-sources"/>
+        </copy>
+    </target>
+
+    <target name="build" depends="build-dompdf"/>
+
+    <!--
+        Builds distributable PEAR packages.
+    -->
+    <target name="build-package" depends="build-dompdf">
+        <d51pearpkg2 baseinstalldir="/" dir="${build.dir}/dompdf">
+           <name>DomPDF</name>
+           <summary>Dom PDF Library</summary>
+           <channel>pear.systemlab.ru</channel>
+           <description>dompdf is an HTML to PDF converter</description>           
+           <lead user="dotsent" name="Dotsent" email="dotsent@uralweb.ru" />
+           <license>EULA</license>
+           <version release="${version}" api="${version}" />
+           <stability release="${stability}" api="${stability}" />
+           <notes>-</notes>
+           <dependencies>
+               <php minimum_version="5.2.0" />
+               <pear minimum_version="1.6.0" recommended_version="1.6.1" />
+           </dependencies>
+        </d51pearpkg2>
+        <exec command="pear package" dir="${build.dir}/dompdf" passthru="true" />
+        <exec command="mv DomPDF-${version}.tgz ../../dist" dir="${build.dir}/dompdf" passthru="true" />
+        <tar destfile="dist/DomPDF-${version}-full.tar.gz" compression="gzip" basedir="${build.dir}">
+            <fileset dir="${build.dir}">
+                <include name="**/**" />
+                <exclude name="logs/" />
+                <exclude name="dompdf/package.xml" />
+            </fileset>
+        </tar>
+    </target>
+</project>
+

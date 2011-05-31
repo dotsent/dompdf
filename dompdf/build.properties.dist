@@ -1,0 +1,13 @@
+version=0.6.0
+stability=beta
+build.dir=build
+dist.dir=dist
+report.dir=reports
+log.archive.dir=logs
+project.pirum_dir=
+project.download_dir=
+test.phpunit_configuration_file=
+test.phpunit_generate_coverage=0
+test.pmd_reports=0
+test.pdepend_exec=
+test.phpmd_exec=
